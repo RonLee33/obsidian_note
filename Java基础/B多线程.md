@@ -191,12 +191,13 @@ public synchronized void method(){
 ### 5.2.2 示例
 
 场景：两个人（两个线程）一起卖100张票（资源：100张票）
-
-- **同步代码块**方式：以实例对象作为同步锁，此时此作为同步锁的对象在整个代码中必须唯一，如下面的代码中，锁对象为Ticket类的实例`tr1`，`tr1`在`main()`中唯一，被多个线程（t1和t2）执行。
+#### 5.2.2.1 同步代码块（以实例作为同步锁）
+以实例对象作为同步锁，此时此作为同步锁的对象在整个代码中必须唯一，如下面的代码中，锁对象为Ticket类的实例`tr1`，`tr1`在`main()`中唯一，被多个线程（t1和t2）执行。
 
 ```java
 public class SaleTicket{
     public static void main(String[] args){
+        // tr1对象是唯一的
         Ticket tr1 = new Ticket();
         Thread t1 = new Thread(tr1);
         Thread t2 = new Thread(tr1);
@@ -206,7 +207,6 @@ public class SaleTicket{
     }
 }
 
-
 class Ticket implements Runnable{
     private int tickets = 100;
 
@@ -214,14 +214,7 @@ class Ticket implements Runnable{
     public void run(){
 
         while (true) {
-            try {
-                // 加入延时，使线程安全问题更加明显
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            synchronized (this) {
+            synchronized (this) {// 以Runnable实例作为同步锁
             // 卖票逻辑--可能会产生线程安全问题的操作（卖票）
                 try {
                     // 加入延时，使线程安全问题更加明显
@@ -242,4 +235,138 @@ class Ticket implements Runnable{
 }
 ```
 
+#### 5.2.2.1 同步代码块（以类作为同步锁）
+以类作为同步锁：以类作为同步锁，此时此作为同步锁的类在整个代码中必须唯一，如下面的代码中，锁对象为Ticket类，尽管有两个Ticket类的实例`t1`和`t2`，但`main()`中只有一个类Ticket，保证了同步锁（Ticket.class）的唯一。
+
+```java
+public class SaleTicket{
+    public static void main(String[] args){
+        Ticket t1 = new Ticket();
+        Ticket t2 = new Ticket();
+
+        t1.start();
+        t2.start();
+    }
+}
+
+class Ticket extends Thread{
+    private static int tickets = 100;
+
+    @Override
+    public void run(){
+
+        while (true) {
+
+            synchronized (Ticket.class) { // 以Thread子类Ticket作为同步锁
+            // 卖票逻辑--可能会产生线程安全问题的操作（卖票）
+                try {
+                    // 加入延时，使线程安全问题更加明显
+                    Thread.sleep(5);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+            }
+
+            // 卖票
+            if (tickets > 0){
+                System.out.println(Thread.currentThread().getName() + "卖出票，票号为：" + tickets);
+                tickets--;
+            } else {
+                break;
+            }
+        }
+    }
+}
+
+```
+
+#### 5.2.2.3 非静态同步方法
+
+此种方式和 5.2.2.1 同步代码块（以实例作为同步锁）本质上是一样的，只是写法不同（即把原同步代码块中的代码封装到一个方法中并以`synchronized`修饰），以下是示例代码：
+
+```java
+public class SaleTicket{
+    public static void main(String[] args){
+        // tr1对象是唯一的
+        Ticket tr1 = new Ticket();
+        Thread t1 = new Thread(tr1);
+        Thread t2 = new Thread(tr1);
+
+        t1.start();
+        t2.start();
+    }
+}
+
+class Ticket implements Runnable{
+    private int tickets = 100;
+
+    @Override
+    public void run(){
+
+        while (tickets > 0) {
+            saleTicket(); 
+        }
+    }
+
+    public synchronized void saleTicket(){ // 以Runnable实例作为同步锁
+        try {
+            // 加入延时，使线程安全问题更加明显
+            Thread.sleep(5);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // 卖票
+        if (tickets > 0){
+            System.out.println(Thread.currentThread().getName() + "卖出票，票号为：" + tickets);
+            tickets--;
+        } 
+    }
+    
+}
+```
+
+#### 5.2.2.4 静态同步方法
+
+此种方式和 5.2.2.2 同步代码块（以类作为同步锁）本质上是一样的，只是写法不同，以下是示例代码：
+
+```java
+public class SaleTicket{
+    public static void main(String[] args){
+        // tr1对象是唯一的
+        Thread t1 = new Thread();
+        Thread t2 = new Thread();
+
+        t1.start();
+        t2.start();
+    }
+}
+
+class Ticket extends Thread{
+    private static int tickets = 100;
+
+    @Override
+    public void run(){
+
+        while (tickets > 0) {
+            saleTicket(); 
+        }
+    }
+
+    public synchronized static void saleTicket(){ // 以Thread子类Ticket作为同步锁
+        try {
+            // 加入延时，使线程安全问题更加明显
+            Thread.sleep(5);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // 卖票
+        if (tickets > 0){
+            System.out.println(Thread.currentThread().getName() + "卖出票，票号为：" + tickets);
+            tickets--;
+        } 
+    }
+    
+}
+```
 
