@@ -165,3 +165,81 @@ public enum State {
 
 ![image.png](https://gitee.com/litan33/image-host/raw/master/img/20230917161221.png)
 
+# 五、线程安全
+
+## 5.1 概念
+
+当多个线程对同一资源对象进行写操作时，该被写对象的结果可能会出现不一致的问题。如一百个线程同时对同一变量执行加一操作，其和可能会小于100，CPU性能越好，其和就会越小，这种类似现象即为线程不安全；若采取一定的措施，使这100个线程的和为100，此时称为是线程安全的。为保证线程安全，常采用的是同步关键字`synchronized`和锁对象`Lock`类的实例
+
+## 5.2 synchronized关键字
+
+### 5.2.1 同步代码块和同步方法
+
+**同步代码块**：synchronized 关键字可以用于某个区块前面，表示只对这个区块的资源实行互斥访问。格式：
+```java
+synchronized (同步锁) {
+    可能产生线程安全问题的代码
+}
+```
+**同步方法**：synchronized 关键字直接修饰方法，表示同一时刻只有一个线程能进入这个方法，其他线程在外面等着。
+```java
+public synchronized void method(){
+    可能产生线程安全问题的代码
+}
+```
+
+### 5.2.2 示例
+
+场景：两个人（两个线程）一起卖100张票（资源：100张票）
+
+- **同步代码块**方式：以实例对象作为同步锁，此时此作为同步锁的对象在整个代码中必须唯一，如下面的代码中，锁对象为Ticket类的实例`tr1`，`tr1`在`main()`中唯一，被多个线程（t1和t2）执行。
+
+```java
+public class SaleTicket{
+    public static void main(String[] args){
+        Ticket tr1 = new Ticket();
+        Thread t1 = new Thread(tr1);
+        Thread t2 = new Thread(tr1);
+
+        t1.start();
+        t2.start();
+    }
+}
+
+
+class Ticket implements Runnable{
+    private int tickets = 100;
+
+    @Override
+    public void run(){
+
+        while (true) {
+            try {
+                // 加入延时，使线程安全问题更加明显
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            synchronized (this) {
+            // 卖票逻辑--可能会产生线程安全问题的操作（卖票）
+                try {
+                    // 加入延时，使线程安全问题更加明显
+                    Thread.sleep(5);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+            }
+
+            // 卖票
+            if (tickets > 0){
+                System.out.println(Thread.currentThread().getName() + "卖出票，票号为：" + tickets);
+                tickets--;
+            } else {
+                break;
+            }
+        }
+    }
+}
+```
+
+
