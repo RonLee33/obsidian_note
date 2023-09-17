@@ -94,7 +94,7 @@ public class MainDemo {
 ## 3.2 常用方法系列1
 
 - `public void run()`：定义线程待执行的任务。
-- `public void start()`：启动线程，使JVM虚拟机启动子线程运行run()的任务。
+- `public void start()`：启动线程，使JVM虚拟机启动子线程运行run()的任务，只能调用一次，否则会报`IllegalThreadStateException`异常。
 - `public void setName(String name)`：为线程命名。
 - `public String getName()`：获取线程名。
 - `public static Thread currentThread()`：返回对当前正在执行的线程对象的引用。
@@ -141,3 +141,27 @@ stateDiagram-v2
 调用setDaemon(true)方法可将指定线程设置为守护线程。必须在线程启动之前设置，否则会报IllegalThreadStateException异常。
 
 调用isDaemon()可以判断线程是否是守护线程。
+
+# 四、线程的生命周期
+
+## 4.1 JDK 1.5之前：5中状态
+
+五种状态：新建（New）、就绪（Runnable）、运行（Running）、阻塞（Blocked）、死亡（Dead）
+![image.png](https://gitee.com/litan33/image-host/raw/master/img/20230917160342.png)
+
+## 4.2 JDK1.5 及之后：6种状态
+
+在`java.lang.Thread.State`的枚举类中这样定义：
+```java
+public enum State {  
+    NEW,  
+    RUNNABLE,  
+    BLOCKED,  
+    WAITING,  
+    TIMED_WAITING,  
+    TERMINATED;  
+}
+```
+
+![image.png](https://gitee.com/litan33/image-host/raw/master/img/20230917161221.png)
+
