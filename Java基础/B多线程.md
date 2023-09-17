@@ -131,3 +131,6 @@ stateDiagram-v2
 与之相关的方法如下：
 - `public final int getPriority()`：获取线程优先级。
 - `public final void setPriority(int newPriority)`：设置线程优先级，范围是[1, 10]之间。
+
+## 3.5 守护进程
+
