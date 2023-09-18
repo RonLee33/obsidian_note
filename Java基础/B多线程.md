@@ -144,7 +144,7 @@ stateDiagram-v2
 
 # 四、线程的生命周期
 
-## 4.1 JDK 1.5之前：5中状态
+## 4.1 JDK 1.5之前：5种状态
 
 五种状态：新建（New）、就绪（Runnable）、运行（Running）、阻塞（Blocked）、死亡（Dead）
 ![image.png](https://gitee.com/litan33/image-host/raw/master/img/20230917160342.png)
@@ -467,6 +467,7 @@ public class LazySingle{
 ```
 
 - 形式四：使用内部类
+内部类只有在外部类被调用才加载，产生INSTANCE实例；又不用加锁,此模式具有之前两个模式的优点，同时屏蔽了它们的缺点，是最好的单例模式。
 ```java
 public class LazySingle{
     private LazySingle(){}
@@ -476,7 +477,89 @@ public class LazySingle{
     }
 
     private static class Inner{
-        
+        static final LazySingle INSTANCE = new LazySingle();
     }
 }
 ```
+
+# 六、死锁
+
+## 6.1 示例
+
+不同的线程分别占用对方需要的同步资源不放弃，都在等待对方放弃自己需要的同步资源，就形成了线程的死锁。
+
+示例：
+```java
+public class DeadLock {
+    public static void main(String[] args) {
+        StringBuilder s1 = new StringBuilder();
+        StringBuilder s2 = new StringBuilder();
+
+        new Thread(){
+            @Override
+            public void run(){
+                synchronized (s1){
+                    s1.append('a');
+                    s2.append('1');
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    synchronized (s2){
+                        s1.append('b');
+                        s2.append('2');
+                        System.out.println(s1);
+                        System.out.println(s2);
+                    }
+                }
+            }
+        }.start();
+
+        new Thread(){
+            @Override
+            public void run(){
+                synchronized (s2){
+                    s1.append('c');
+                    s2.append('3');
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    synchronized (s1){
+                        s1.append('d');
+                        s2.append('4');
+                        System.out.println(s1);
+                        System.out.println(s2);
+                    }
+                }
+            }
+        }.start();
+    }
+}
+```
+
+![image.png](https://gitee.com/litan33/image-host/raw/master/img/20230918202935.png)
+
+从上图的结果可知（没打印s1和s2），程序已处于死锁状态。
+
+## 6.2 死锁的诱因及解决思路
+
+### 6.2.1 诱因
+
+1. 互斥条件
+2. 占用且等待
+3. 不可抢夺（或不可抢占）
+4. 循环等待
+> 以上四个条件，同时出发便会死锁。
+
+### 6.3.2 解决思路
+
+死锁一旦出现，基本很难人为干预，只能尽量规避。可以考虑打破上面的诱发条件。
+
+- 针对条件1：互斥条件基本上无法被破坏。因为线程需要通过互斥解决安全问题。
+- 针对条件2：可以考虑一次性申请所有所需的资源，这样就不存在等待的问题。
+- 针对条件3：占用部分资源的线程在进一步申请其他资源时，如果申请不到，就主动释放掉已经占用的资源。
+- 针对条件4：可以将资源改为线性顺序。申请资源时，先申请序号较小的，这样避免循环等待问题。
