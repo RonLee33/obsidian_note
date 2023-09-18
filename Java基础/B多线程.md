@@ -370,3 +370,113 @@ class Ticket extends Thread{
 }
 ```
 
+## 5.3 同步操作的思考顺序
+
+### 5.3.1 如何找问题（非常重要）
+
+即代码是否存在线程安全：
+（1）明确哪些代码是多线程运行的代码。
+（2）明确多个线程是否有共享数据。
+（3）明确多线程运行代码中是否有多条语句操作共享数据。
+
+### 5.3.2 如何解决（非常重要）
+
+对多条操作共享数据的语句，只能让一个线程都执行完，在执行过程中，其他线程不可以参与执行。 即所有操作共享数据的这些语句都要放在同步范围中。
+
+注意：
+- 范围太小：不能解决安全问题;
+- 范围太大：因为一旦某个线程抢到锁，其他线程就只能等待，所以范围太大，效率会降低，不能合理利用CPU资源。
+## 5.4 单例模式的线程安全问题
+
+### 5.4.1 饿汉式（无线程安全问题）
+
+即在类初始化时就直接创建单例对象，而类初始化过程是没有线程安全问题的。
+- 形式一：
+```java
+public class HungrySingle{
+    private static HungrySingle INSTANCE = new HungrySingle();
+    private HungrySingle(){}
+
+    public static HungrySingle getInstance(){
+        return INSTANCE;
+    }
+}
+```
+
+- 形式二：
+```java
+public enum HungrySingle{
+    INSTANCE;
+}
+```
+
+### 5.4.2 懒汉式（有线程问题）
+
+延迟创建对象，第一次调用`getInstance`方法再创建对象。完全有可能的情况是，多个线程同时调用`getInstance()`，使得其结果（引用对象）不一致。
+
+- 形式一（静态同步方法）：
+```java
+public class LazySingle{
+    private static LazySingle instance;
+    private LazySingle(){}
+
+    public static synchronized LazySingle getInstance(){
+        if (instance == null){
+            instance = new LazySingle();
+        }
+        return instance;
+    }
+}
+```
+
+- 形式二（同步代码块）：
+```java
+public class LazySingle{
+    private static LazySingle instance;
+    private LazySingle(){}
+
+    public static LazySingle getInstance(){
+        synchronized (LazySingle.class) {
+            if (instance == null){
+                instance = new LazySingle();
+            }
+        }
+        return instance;
+    }
+}
+```
+
+- 形式三（是形式二的优化）：
+```java
+public class LazySingle{
+    // volatile避免instance = new LazySingle();过程中的指令重排问题
+    private static volatile LazySingle instance = null;
+    private LazySingle(){}
+
+    public static LazySingle getInstance(){
+        if (instance == null){
+            synchronized (LazySingle.class) {
+                if (instance == null){
+                    instance = new LazySingle();
+                }
+            }
+        }
+        return instance;
+    }
+}
+```
+
+- 形式四：使用内部类
+```java
+public class LazySingle{
+    private LazySingle(){}
+
+    public static LazySingle getInstance(){
+        return Inner.INSTANCE;
+    }
+
+    private static class Inner{
+        
+    }
+}
+```
