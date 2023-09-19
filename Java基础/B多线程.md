@@ -790,3 +790,83 @@ class Customer extends Thread{
 
 # 八、JDK5新增的线程创建方式（了解即可）
 
+## 8.1 实现Callable接口
+
+简单记忆，Callable即有返回值的`Runnable`。
+
+代码示例如下：
+```java
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+
+
+public class CallableDemo {
+    public static void main(String[] args) {
+        NumCallable numCallable = new NumCallable();
+        FutureTask<Integer> futureTask = new FutureTask<Integer>(numCallable);
+        new Thread(futureTask).start();
+        try {
+            int sum = futureTask.get();// 在NumCallable中的call()执行完之前，System.out.println("总和为：" + sum);会一直阻塞
+            System.out.println("总和为：" + sum);
+        } catch (InterruptedException e){
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+
+class NumCallable implements Callable<Integer>{
+    @Override
+    public Integer call() throws Exception{
+        int sum = 0;
+        for (int i = 1; i <= 100; i++) {
+            if (i % 2 == 0) {
+                System.out.println(i);
+                sum += i;
+            }
+        }
+        return sum;
+    }
+}
+```
+
+## 8.2 线程池
+
+在需要频繁创建多个执行短（短指时间）任务的线程的情况下，频繁地创建销毁线程（建/毁线程耗时间和系统资源）会降低系统的效率，此时，适合使用线程池，即线程执行完任务后，不会销毁，而是存入“池”中，以待之后运行，节省了建/毁线程耗时间和系统资源。以下是线程池的简单使用：
+
+```java
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
+
+
+public class ThreadPoolDemo {
+    public static void main(String[] args) {
+        ExecutorService service = Executors.newFixedThreadPool(10);
+        ThreadPoolExecutor service1 = (ThreadPoolExecutor) service;
+        // 设置线程池中线程数的上限
+        service1.setMaximumPoolSize(50);
+        service.execute(new Runnable() {
+            @Override
+            public void run(){
+                for (int i = 0; i <= 100; i += 2) {
+                    System.out.println(Thread.currentThread().getName() + ": " + i);
+                }
+            }
+        });
+
+        try {
+            Future<Integer> future = service.submit(new NumCallable());
+            System.out.println("总和为：" + future.get());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        service.shutdown();
+    }
+}
+```
+
