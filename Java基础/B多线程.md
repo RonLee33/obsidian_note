@@ -563,3 +563,202 @@ public class DeadLock {
 - 针对条件2：可以考虑一次性申请所有所需的资源，这样就不存在等待的问题。
 - 针对条件3：占用部分资源的线程在进一步申请其他资源时，如果申请不到，就主动释放掉已经占用的资源。
 - 针对条件4：可以将资源改为线性顺序。申请资源时，先申请序号较小的，这样避免循环等待问题。
+
+## 6.3 JDK5新特性：Lock(显式锁)  
+
+- JDK5.0的新增功能，保证线程的安全。与采用`synchronized`相比，Lock可提供多种锁方案，更灵活、更强大。Lock通过显式定义同步锁对象来实现同步。同步锁使用Lock对象充当。  
+- `java.util.concurrent.locks.Lock`接口是控制多个线程对共享资源进行访问的工具。锁提供了对共享资源的独占访问，每次只能有一个线程对Lock对象加锁，线程开始访问共享资源之前应先获得Lock对象。  
+- 在实现线程安全的控制中，比较常用的是*ReentrantLock*，可以显式加锁、释放锁。  
+  
+> ReentrantLock类实现了 Lock 接口，它拥有与 synchronized 相同的并发性和内存语义，但是添加了类似锁投票、定时锁等候和可中断锁等候的一些特性。此外，它还提供了在激烈争用情况下更佳的性能。  
+  
+- Lock锁也称同步锁，加锁与释放锁方法。  
+  
+> `public void lock()` :加同步锁  
+>  
+> `public void unlock()` :释放同步锁  
+  
+代码结构：  
+  
+```java  
+class LockDemo{  
+    //1. 创建Lock的实例，必须确保多个线程共享同一个Lock实例  
+    private final ReentrantLock lock = new ReentrantLock();  
+      
+    public void method(){  
+        try {  
+            //2. 调动lock()，实现需共享的代码的锁定  
+                lock.lock();  
+              
+            // 保证线程安全的代码  
+        } finally {  
+            //3. 调用unlock()，释放共享代码的锁定  
+            lock.unlock();  
+        }  
+    }  
+}  
+```  
+  
+举例：  
+  
+```java  
+import java.util.concurrent.locks.ReentrantLock;  
+  
+public class ExplicitLockDemo {  
+    public static void main(String[] args) {  
+        Window w = new Window();  
+        Thread t1 = new Thread(w, "窗口A");  
+        Thread t2 = new Thread(w, "窗口B");  
+  
+        t1.start();  
+        t2.start();  
+    }  
+}  
+  
+class Window implements Runnable{  
+    private int ticket = 100;  
+    private final ReentrantLock lock = new ReentrantLock();  
+  
+    @Override  
+    public void run(){  
+        while (true) {  
+            try {  
+                lock.lock();  
+  
+                try {  
+                    Thread.sleep(10);  
+                } catch (InterruptedException  e) {  
+                    e.printStackTrace();  
+                }  
+  
+                if (ticket > 0) {  
+                    System.out.println(Thread.currentThread().getName() + "卖出票号：" + ticket--);  
+                } else {  
+                    break;  
+                }  
+            }  
+            finally {  
+                lock.unlock();  
+            }  
+              
+        }  
+    }  
+}  
+  
+```  
+  
+# 七、 线程间的通信  
+  
+## 7.1 简介  
+  
+线程间对同一资源的写操作造成了资源竞争，易引发线程安全问题；但线程间也会有协作，如线程A生成某资源、线程B消费某资源，即生产者-消费者模型，线程通信是通过 `wait()-notify()/notifyAll()`实现的。  
+  
+> `wait()/wait(time)`，立即释放所持有的同步锁和资源，并不再参与CPU的调度，直到被其他线程`notify()/notifyAll()`，被通知的线程被唤醒后也不一定能立即恢复执行，因为它当初中断的地方是在同步块内，而此刻它已经不持有锁，所以它需要再次尝试去获取锁（很可能面临其它线程的竞争），成功后才能在当初调用 wait 方法之后的地方恢复执行。  
+  
+总结如下： 
+- 如果能获取锁，线程就从 WAITING 状态变成 RUNNABLE（可运行） 状态；  
+- 否则，线程就从 WAITING 状态又变成 BLOCKED（等待锁） 状态。  
+  
+## 7.2 调用wait和notify需注意的细节  
+  
+- wait方法与notify方法必须要由*同一个锁对象调用*。因为：对应的锁对象可以通过notify唤醒使用同一个锁对象调用的wait方法后的线程。  
+- wait方法与notify方法是属于Object类的方法的。因为：锁对象可以是任意对象，而任意对象的所属类都是继承了Object类的。  
+- wait方法与notify方法必须要在*同步代码块*或者是*同步函数*中使用。因为：必须要*通过锁对象*调用这2个方法。否则会报`java.lang.IllegalMonitorStateException`异常。
+
+## 7.3 生产者-消费者示例
+
+ 生产者(Productor)将产品交给店员(Clerk)，而消费者(Customer)从店员处取走产品，店员一次只能持有固定数量的产品（比如:20），如果生产者试图生产更多的产品，店员会叫生产者停一下，如果店中有空位放产品了再通知生产者继续生产；如果店中没有产品了，店员会告诉消费者等一下，如果店中有产品了再通知消费者来取走产品。
+
+```java
+public class ProducerCustomer {
+    public static void main(String[] args) {
+        Clerk clerk = new Clerk();
+        Productor productor = new Productor(clerk);
+        Customer customerA = new Customer(clerk);
+        Customer customerB = new Customer(clerk);
+
+        productor.setName("生产者");
+        customerA.setName("消费者 A");
+        customerB.setName("消费者 B"); 
+
+        productor.start();
+        customerA.start();
+        customerB.start();
+    }
+}
+
+  
+class Clerk{
+    private int productNum = 0;
+    public synchronized void addProduct(){
+        if (productNum < 20) {
+            productNum++;
+            System.out.println(Thread.currentThread().getName() + "生产了第" + productNum + "个产品");
+            notifyAll(); //生产一次就唤醒一次消费者
+        } else {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+  
+    public synchronized void subProduct(){
+        if (productNum > 0) {
+            System.out.println(Thread.currentThread().getName() + "消费了第" + productNum + "个产品");
+            productNum--;
+            notifyAll(); // 消费一个就唤醒一次生产者
+        } else {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+
+
+class Productor extends Thread{
+    private Clerk clerk;
+    Productor(Clerk clerk){
+        this.clerk = clerk;
+    }
+    @Override
+    public void run(){
+        while (true) {
+            try {
+                Thread.sleep(50); // 延时操作应放在run()中，模拟线程实际业务的耗时操作
+            } catch (InterruptedException e){
+                e.printStackTrace();
+            }
+            clerk.addProduct();
+        }
+    }
+}
+
+  
+
+class Customer extends Thread{
+    private Clerk clerk;
+    Customer(Clerk clerk){
+        this.clerk = clerk;
+    }
+    
+    @Override
+    public void run(){
+        while (true) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e){
+                e.printStackTrace();
+            }
+            clerk.subProduct();
+        }
+    }
+}
+```
+
+运行结果如下：
+![image.png](https://gitee.com/litan33/image-host/raw/master/img/20230919180817.png)
