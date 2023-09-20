@@ -44,7 +44,8 @@ public class StringDemo {
 }
 ```
 解析如下：
-![](Pasted%20image%2020230920114937.png)
+![image.png](https://gitee.com/litan33/image-host/raw/master/img/20230920192756.png)
+
 总结：
 > 常量+常量：结果是常量池。且常量池中不会存在相同内容的常量。
 > 常量+变量 或 变量+变量：结果在堆中。
