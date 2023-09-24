@@ -157,3 +157,137 @@ public class StringDemo2 {
 26. `String replace(CharSequence target, CharSequence replacement)`：使用指定的字面值替换序列替换此字符串所有匹配字面值目标序列的子字符串。
 27. `String replaceAll(String regex, String replacement)`：使用给定的 replacement 替换此字符串所有匹配给定的正则表达式的子字符串。
 28. `String replaceFirst(String regex, String replacement)`：使用给定的 replacement 替换此字符串匹配给定的正则表达式的第一个子字符串。
+
+## 1.2 可变字符序列
+
+因为String对象是不可变对象，虽然可以共享常量对象，但是对于频繁字符串的修改和拼接操作，效率极低，空间消耗也比较高。因此，JDK又在`java.lang`包提供了可变字符序列`StringBuffer`和`StringBuilder`类型。
+
+### 1.2.1 StringBuilder/StringBuffer异同
+#String/可变字符串 
+
+- 相同点：
+> `StringBuilder` 和 `StringBuffer` 非常类似，均代表可变的字符序列，**而且提供相关功能的方法也一样**。
+- 不同点：
+> `StringBuffer`:可变的字符序列；**线程安全**（方法有`synchronized`修饰），**效率低**；底层使用`char[]`数组存储 (JDK8.0中)；
+> `StringBuilder`:可变的字符序列； jdk1.5引入，**线程不安全**的，**效率高**；底层使用`char[]`数组存储(JDK8.0中)
+
+### 1.2.2 常用API
+#String/可变字符串/常用API  
+
+1. `StringBuffer append(xx)`：提供了很多的`append()`方法，用于进行字符串**追加的方式拼接**。
+2. `StringBuffer delete(int start, int end)`：删除`[start,end)`之间字符。
+3. `StringBuffer deleteCharAt(int index)`：删除`[index]`位置字符。
+4. `StringBuffer replace(int start, int end, String str)`：替换`[start,end)`范围的字符序列为`str`。
+5. `void setCharAt(int index, char c)`：替换`[index]`位置字符。
+6. `char charAt(int index)`：查找指定`index`位置上的字符。
+7. `StringBuffer insert(int index, xx)`：在`[index]`位置插入xx。
+8. `int length()`：返回存储的**字符数据的长度**。
+9. `StringBuffer reverse()`：反转。
+
+----
+#String/可变字符串/其他API
+
+10. `int indexOf(String str)`：在当前字符序列中查询str的第一次出现下标。
+11. `int indexOf(String str, int fromIndex)`：在当前字符序列`[fromIndex,最后]`中查询str的第一次出现下标。
+12. `int lastIndexOf(String str)`：在当前字符序列中查询str的最后一次出现下标。
+13. `String substring(int start)`：截取当前字符序列`[start,最后]`。
+14. `String substring(int start, int end)`：截取当前字符序列`[start,end)`。
+15. `String toString()`：返回此序列中数据的字符串表示形式。
+16. `void setLength(int newLength)` ：设置当前字符序列长度为`newLength`。
+
+### 1.2.3 练习
+
+- String、StringBuffer(线程安全)、StringBuilder效率比较：
+```java
+public class EfficiencyTest {
+    public static void main(String[] args) {
+        long startTime = 0L;
+        long endTime = 0L;
+
+        String text = "";
+        StringBuffer buffer = new StringBuffer("");
+        StringBuilder builder = new StringBuilder("");
+
+        startTime = System.currentTimeMillis();
+        for (int i = 0; i < 20000; i++) {
+            buffer.append(String.valueOf(i));
+        }
+        endTime = System.currentTimeMillis();
+        System.out.println("StringBuffer执行时间：" + (endTime - startTime));
+
+        startTime = System.currentTimeMillis();
+        for (int i = 0; i < 20000; i++) {
+            builder.append(String.valueOf(i));
+        }
+        endTime = System.currentTimeMillis();
+        System.out.println("StringBuilder执行时间：" + (endTime - startTime));
+
+        startTime = System.currentTimeMillis();
+        for (int i = 0; i < 20000; i++) {
+            text = text + i;
+        }
+        endTime = System.currentTimeMillis();
+        System.out.println("String执行时间：" + (endTime - startTime));
+    }
+}
+```
+- 可变字符的构造器、长度
+```java
+public class StringExer {
+    public static void main(String[] args) {
+        String str = null;
+        StringBuffer sb = new StringBuffer();
+        sb.append(str);
+        System.out.println(sb.length());//16 --实际是4
+
+        System.out.println(sb);//null
+
+		// 实际会报Exception in thread "main" java.lang.NullPointerException
+        StringBuffer sb1 = new StringBuffer(str);
+        System.out.println(sb1);//null 
+
+    }
+
+}
+
+```
+
+# 二、日期时间
+
+## 2.1 java.util.Date
+
+- 构造器
+```java
+public Date(long date){
+	// date是毫秒数
+	fastTime = date;
+}
+
+public Date() {
+	// 当前时间与1970年1月1日0时0分0秒之间以毫秒为单位的时间差。
+	this(System.currentTimeMillis());
+}
+```
+
+- 常用API
+> 1）`getTime()`: 返回自 1970 年 1 月 1 日 00:00:00 GMT 以来此 Date 对象表示的毫秒数。
+> 2）`toString()`: 把此 Date 对象转换为以下形式的 String： dow mon dd hh:mm:ss zzz yyyy
+>  (如：Fri Sep 22 17:06:15 CST 2023)；
+> 	 其中： dow 是一周中的某一天 (Sun, Mon, Tue, Wed, Thu, Fri, Sat)，zzz是时间标准。
+
+## 2.2 java.text.SimpleDateFormat
+
+java.text.SimpleDateFormat类是一个不与语言环境有关的方式来格式化和解析日期的具体类。
+可以进行格式化：`Date` --> `String`（即，`simpleDateFormat.format(Date date)`）
+可以进行解析：`String` --> `Date`（即，`simpleDateFormat.parse(String text)`）
+
+- 构造器
+> `public SimpleDateFormat()`：默认的模式和语言环境创建对象。
+> `public SimpleDateFormat(String pattern)`：该构造方法可以用参数pattern指定的格式创建一个对象。
+
+- 格式化
+> `public String format(Date date)`：方法格式化时间对象date，即 `Date` -> `String`。
+
+- 解析
+> `public Date parse(String source)`：从给定字符串的开始解析文本，以生成一个日期，即`String` -> `Date`。
+
