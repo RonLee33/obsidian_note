@@ -284,10 +284,98 @@ java.text.SimpleDateFormat类是一个不与语言环境有关的方式来格式
 - 构造器
 > `public SimpleDateFormat()`：默认的模式和语言环境创建对象。
 > `public SimpleDateFormat(String pattern)`：该构造方法可以用参数pattern指定的格式创建一个对象。
+![image.png](https://gitee.com/litan33/image-host/raw/master/img/20230924165344.png)
+
 
 - 格式化
 > `public String format(Date date)`：方法格式化时间对象date，即 `Date` -> `String`。
 
 - 解析
 > `public Date parse(String source)`：从给定字符串的开始解析文本，以生成一个日期，即`String` -> `Date`。
+
+- 示例
+```java
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+
+public class SDFDemo {
+    public static void main(String[] args) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS E Z");
+        Date date = new Date();
+        
+        // Date -> String
+        String dateStr = sdf.format(date);
+        System.out.println(dateStr);
+  
+        // String -> Date
+        Date date2 = sdf.parse(dateStr);
+        System.out.println(date2);
+    }
+}
+```
+
+效果：
+![image.png](https://gitee.com/litan33/image-host/raw/master/img/20230924165640.png)
+
+
+## 2.3 java.util.Calendar
+
+Date类的API大部分被废弃了，替换为Calendar，Calendar 类是一个抽象类，主用用于完成日期字段之间相互操作的功能。
+
+### 2.3.1 常用方法
+
+1.  `Calendar.getInstance()`: 获取Calender实例。
+2. `public int get(int field)`：返回给定日历字段的值。
+3. `public void set(int field,int value) `：将给定的日历字段设置为指定的值。
+4. `public void add(int field,int amount)`：根据日历的规则，为给定的日历字段添加或者减去指定的时间量。
+5. `public final Date getTime()`：将Calendar转成Date对象。
+6. `public final void setTime(Date date)`：使用指定的Date对象重置Calendar的时间。
+### 2.3.2 示例及运行效果
+
+```java
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
+
+
+public class CalendarDemo {
+    public static void main(String[] args) {
+        Calendar c = Calendar.getInstance();
+        
+        int year = c.get(Calendar.YEAR);
+        System.out.println(year);
+        
+        // 获取星期时：1是星期日，2是星期一，以此类推，7是星期六
+        // 获取月份时：一月是0，二月是1，以此类推，12月是11
+        c.get(Calendar.MONTH);
+        System.out.println("修改前的月份：" + c.getTime());
+        System.out.println("修改前的c.MONTH=" + c.get(Calendar.MONTH));
+        // 设置属性
+        c.set(Calendar.MONTH, 0);
+        System.out.println("修改后的月份：" + c.getTime());
+        System.out.println("修改后的c.MONTH=" + c.get(Calendar.MONTH));
+
+        // 为属性进行加减,两个月前
+        c.add(Calendar.MONTH, -2);
+        System.out.println("两个月：" + c.getTime());
+        System.out.println("c.add(Calendar.MONTH, -2)后：" + c.get(Calendar.MONTH));
+        System.out.println(c.get(Calendar.YEAR));
+
+  
+        TimeZone timeZone = TimeZone.getTimeZone("America/Los_Angeles");
+        Calendar c1 = Calendar.getInstance(timeZone);
+        // Calender -> Date
+        Date date = c1.getTime();
+        System.out.println(date);
+    }
+}
+```
+
+运行效果：
+![image.png](https://gitee.com/litan33/image-host/raw/master/img/20230924180748.png)
+
+
+
 
