@@ -473,24 +473,13 @@ public class CalenderExer {
 
 ![image.png](https://gitee.com/litan33/image-host/raw/master/img/20230924194024.png)
 
-## 2.5 旧时间小结
 
-旧时间的转换关系：
-
-```mermaid
-flowchart LR
-    Calender -->|calender.getTime| Date
-
-    Date -->|date.getTime| long:毫秒数
-
-    Date -->|simpleDateFormat.format| String -->|simpleDateFormat.parse| Date
-```
-
-## 2.6 JDK8中新的日期时间API
+## 2.5 JDK8中新的日期时间API
+#新时间
 
 简单理解：`LocalDateTime` = `LocalDate` + `LocalTime`，即，日期时间 = 日期 + 时间。
 
-### 2.6.1 日期时间的实例获取（of/now()）
+### 2.5.1 日期时间的实例获取（of/now()）
 
 ```java
 import java.time.LocalDate;
@@ -520,7 +509,7 @@ public class LocalDateTimeDemo {
 }    
 ```
 
-### 2.6.2 常用API
+### 2.5.2 常用API
 
 - `LocalDateTime`：
 > 1. get相关：
@@ -538,3 +527,25 @@ public class LocalDateTimeDemo {
 > ![image.png](https://gitee.com/litan33/image-host/raw/master/img/20230925190614.png)
 
 
+## 2.6 旧/新时间小结
+
+`simpleDateFormat.parse:string` 即`simpleDateFormat.parse(string)`。
+旧时间的转换关系：
+
+```mermaid
+flowchart LR
+    Calender -->|calender.getTime| Date
+
+    Date -->|date.getTime| long:毫秒数
+
+    Date -->|simpleDateFormat.format:date| String -->|simpleDateFormat.parse:string| Date
+```
+
+新时间的转换关系：
+
+```mermaid
+flowchart TD
+    LocalDateTime --> |dateTimeFormatter.format:localDateTime| String
+    String --> | dateTimeFormatter.parse:string| TemporalAccessor
+    TemporalAccessor --> |LocalDateTime.from:temporalAccessor| LocalDateTime
+```
