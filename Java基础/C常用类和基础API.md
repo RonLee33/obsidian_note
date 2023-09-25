@@ -524,16 +524,17 @@ public class LocalDateTimeDemo {
 
 - `LocalDateTime`：
 > 1. get相关：
-> ![image.png](https://gitee.com/litan33/image-host/raw/master/img/20230925185501.png)
+> ![image.png](https://gitee.com/litan33/image-host/raw/master/img/20230925190339.png)
+
 
 > 2. set之加时间：
-> ![image.png](https://gitee.com/litan33/image-host/raw/master/img/20230925185550.png)
+>![image.png](https://gitee.com/litan33/image-host/raw/master/img/20230925190443.png)
 
 > 3. set之减时间：
-> ![image.png](https://gitee.com/litan33/image-host/raw/master/img/20230925185620.png)
-
+> ![image.png](https://gitee.com/litan33/image-host/raw/master/img/20230925190522.png)
 
 -  `LocalDate` 、 `LocalTime`的set、get方法
 > 与`LocalDateTime`类似，在此略去，实际使用时，按IDE提示及需要使用即可。特别地，`LocalDate`有个实用的方法——判断闰年：
->![image.png](https://gitee.com/litan33/image-host/raw/master/img/20230925185656.png)
+> ![image.png](https://gitee.com/litan33/image-host/raw/master/img/20230925190614.png)
+
 
