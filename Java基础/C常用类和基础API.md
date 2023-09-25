@@ -475,7 +475,7 @@ public class CalenderExer {
 
 ## 2.5 旧时间小结
 
-旧时间的转换关系
+旧时间的转换关系：
 
 ```mermaid
 flowchart LR
@@ -483,6 +483,57 @@ flowchart LR
 
     Date -->|date.getTime| long:毫秒数
 
-    Date -->|simpleDateFormat.parse| String -->|simpleDateFormat.parse| Date
+    Date -->|simpleDateFormat.format| String -->|simpleDateFormat.parse| Date
 ```
+
+## 2.6 JDK8中新的日期时间API
+
+简单理解：`LocalDateTime` = `LocalDate` + `LocalTime`，即，日期时间 = 日期 + 时间。
+
+### 2.6.1 日期时间的实例获取（of/now()）
+
+```java
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+
+public class LocalDateTimeDemo {
+    public static void main(String[] args) {
+	    LocalDate nowLD = LocalDate.now();
+        System.out.println("nowLD=" + nowLD);
+        
+        LocalTime nowLT = LocalTime.now();
+        System.out.println("nowLT=" + nowLT);
+
+        LocalDateTime nowLDT = LocalDateTime.now();
+        System.out.println("nowLDT=" + nowLDT);
+
+        LocalDate localDate = LocalDate.of(2023, 9, 25);
+        System.out.println("localDate=" + localDate);
+
+        LocalTime localTime = LocalTime.of(16, 4, 5);
+        System.out.println("localTime=" + localTime);
+
+        LocalDateTime localDateTime = LocalDateTime.of(2023, 9, 25, 16, 4, 5);
+        System.out.println("localDateTime=" + localDateTime);
+    }
+}    
+```
+
+### 2.6.2 常用API
+
+- `LocalDateTime`：
+> 1. get相关：
+> ![image.png](https://gitee.com/litan33/image-host/raw/master/img/20230925185501.png)
+
+> 2. set之加时间：
+> ![image.png](https://gitee.com/litan33/image-host/raw/master/img/20230925185550.png)
+
+> 3. set之减时间：
+> ![image.png](https://gitee.com/litan33/image-host/raw/master/img/20230925185620.png)
+
+
+-  `LocalDate` 、 `LocalTime`的set、get方法
+> 与`LocalDateTime`类似，在此略去，实际使用时，按IDE提示及需要使用即可。特别地，`LocalDate`有个实用的方法——判断闰年：
+>![image.png](https://gitee.com/litan33/image-host/raw/master/img/20230925185656.png)
 
