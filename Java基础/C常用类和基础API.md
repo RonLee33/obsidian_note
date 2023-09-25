@@ -255,6 +255,7 @@ public class StringExer {
 # 二、日期时间
 
 ## 2.1 java.util.Date
+#旧时间
 
 - 构造器
 ```java
@@ -276,6 +277,7 @@ public Date() {
 > 	 其中： dow 是一周中的某一天 (Sun, Mon, Tue, Wed, Thu, Fri, Sat)，zzz是时间标准。
 
 ## 2.2 java.text.SimpleDateFormat
+#旧时间
 
 java.text.SimpleDateFormat类是一个不与语言环境有关的方式来格式化和解析日期的具体类。
 可以进行格式化：`Date` --> `String`（即，`simpleDateFormat.format(Date date)`）
@@ -321,6 +323,7 @@ public class SDFDemo {
 
 
 ## 2.3 java.util.Calendar
+#旧时间
 
 Date类的API大部分被废弃了，替换为Calendar，Calendar 类是一个抽象类，主用用于完成日期字段之间相互操作的功能。
 
@@ -469,3 +472,17 @@ public class CalenderExer {
 运行结果如下：
 
 ![image.png](https://gitee.com/litan33/image-host/raw/master/img/20230924194024.png)
+
+## 2.5 旧时间小结
+
+旧时间的转换关系
+
+```mermaid
+flowchart LR
+    Calender -->|calender.getTime| Date
+
+    Date -->|date.getTime| long:毫秒数
+
+    Date -->|simpleDateFormat.parse| String -->|simpleDateFormat.parse| Date
+```
+
