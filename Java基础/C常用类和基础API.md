@@ -548,3 +548,60 @@ flowchart TD
     String --> | dateTimeFormatter.parse:string| TemporalAccessor
     TemporalAccessor --> |LocalDateTime.from:temporalAccessor| LocalDateTime
 ```
+# 三、Java比较器
+
+## 3.1 自然排序：java.lang.Comparable
+
+Comparable接口强行对实现它的每个类的对象进行整体排序。这种排序被称为类的自然排序。
+实现 Comparable 的类必须实现 compareTo(Object obj)方法，两个对象即通过 compareTo(Object obj) 方法的返回值来比较大小。如果当前对象this大于形参对象obj，则返回正整数，如果当前对象this小于形参对象obj，则返回负整数，如果当前对象this等于形参对象obj，则返回零。
+
+示例如下：
+```java
+public class Person implements Comparable<Object>{
+    // Comparable 自然排序
+    private String name;
+    private int age;
+
+    public Person(String name, int age){
+        this.name = name;
+        this.age = age;
+    }
+  
+    @Override
+    public int compareTo(Object o) {
+        // 按年龄升序排序
+        if (o instanceof Person){
+            Person other = (Person) o;
+            return Integer.compare(age, other.getAge());
+        }
+        throw new RuntimeException("o 不是Person的子类，无法比较");
+    }
+}    
+```
+
+
+## 3.2 定制排序：java.util.Comparator
+
+能更自由地定制对象的排序规则，甚至覆盖掉java.lang.Comparable实现中的compareTo()方法，示例代码如下：
+
+```java
+Arrays.sort(persons, new Comparator<Object>() {
+        // Comparator， 定制排序
+        @Override
+        public int compare(Object o1, Object o2) {
+            if (o1 instanceof Person && o2 instanceof Person){
+                // 按姓名升序排序
+                Person p1 = (Person) o1;
+                Person p2 = (Person) o2;
+                int result = p1.getName().compareTo(p2.getName());
+                return result;
+            }
+            throw new RuntimeException("入参之一 不是Person的子类，无法比较");
+        }
+    });
+
+    for (Person person : persons) {
+        // 按姓名升序排序输出,即 Comparator会覆盖掉 Person从Comparable中重写的compareTo方法中的比较准则
+        System.out.println(person);
+    }
+```
