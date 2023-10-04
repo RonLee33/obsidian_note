@@ -33,3 +33,24 @@ Java集合框架分为两大类，Collection（单列数据集合，类似数组
 12. `Object[] toArray()`：返回包含当前集合中所有元素的数组 。
 13. `hashCode()`：获取集合对象的哈希值 。
 14. `iterator()`：返回迭代器对象，用于集合遍历。
+
+## 2.2 List
+
+List是Collection的子接口之一，List集合类中元素有序、且可重复，集合中的每个元素都有其对应的顺序索引，常用方法如下：
+
+1. 插入元素
+> `void add(int index, Object ele)`:在index位置插入ele元素。
+> `boolean addAll(int index, Collection eles)`:从index位置开始将eles中的所有元素添加进来。
+
+2. 获取元素
+> `Object get(int index)`:获取指定index位置的元素。
+> `List subList(int fromIndex, int toIndex)`:返回从fromIndex到toIndex位置的子集合。
+
+
+3. 获取元素索引
+> `int indexOf(Object obj)`:返回obj在集合中首次出现的位置。
+> `int lastIndexOf(Object obj)`:返回obj在当前集合中末次出现的位置。
+
+4. 删除和替换元素
+> `Object remove(int index)`:移除指定index位置的元素，并返回此元素。
+> `Object set(int index, Object ele)`:设置指定index位置的元素为ele。
