@@ -54,3 +54,19 @@ List是Collection的子接口之一，List集合类中元素有序、且可重�
 4. 删除和替换元素
 > `Object remove(int index)`:移除指定index位置的元素，并返回此元素。
 > `Object set(int index, Object ele)`:设置指定index位置的元素为ele。
+
+可以使用以下代码快速创建List对象：
+```java
+List<String> list1 = Arrays.asList("red", "green", "blue");
+List<Integer> list2 = Arrays.asList(1, 2, 3);
+```
+### 2.2.1 ArrayList与LinkedList
+
+ArrayList（数组线性表）在概念上相当于数组，与数组不同的是，ArrayList的大小可以按其元素多少的变化而变化，不会像数组那样大小是固定的，它只能在末尾插入或删除元素；LinkedList（链表）可以在任何位置随意插入或删除元素，因此除在尾部增删元素外，LinkedList的效率比ArrayList高，以下是LinkedList常用方法：
+
+> `public void addFirst(Object o)`：在头部插入元素o
+> `public void addLast(Object o)`：在尾部插入元素o
+> `public Object getFirst()`：返回头元素（第一个元素）
+> `public Object getLast()`：返回尾元素（最后一个元素）
+> `public Object removeFirst()`：返回并删除头元素
+> `public Object removeLast()`：返回并删除尾元素
