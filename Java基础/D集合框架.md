@@ -70,3 +70,71 @@ ArrayList（数组线性表）在概念上相当于数组，与数组不同的�
 > `public Object getLast()`：返回尾元素（最后一个元素）
 > `public Object removeFirst()`：返回并删除头元素
 > `public Object removeLast()`：返回并删除尾元素
+
+## 2.3 Set
+
+Set（规则集）是一种不允许存在重复元素的容器类型，概念类似于数学中的“集合”，即无序性、唯一性和确定性。其常用子类有三种，分别是HashSet（完全无序）、LinkedSet（按添加元素时的顺序保存各元素的顺序）、TreeSet（按指定的排序规则进行升序排序），因排序会耗时，所以就效率上而言，这三者由高到低排序为：HashSet > LinkedSet > TreeSet。
+
+重点介绍TreeSet，TreeSet常用构造方法如下：
+```java
+public TreeSet(){
+    // 无参构造
+}
+
+public TreeSet(Collection<? extends E> c){
+    // 将特定的Collection转为TreeSet
+}
+
+public TreeSet(Comparator<? super E> c){
+    // 指定排序规则的TreeSet
+}
+
+```
+以下例子是TreeSet常用方法的使用：
+
+```java
+import java.util.HashSet;
+import java.util.Set;
+import java.util.TreeSet;
+
+/*TreeSet常用方法*/
+public class TreeSetDemo {
+    public static void main(String[] args) {
+        Set<String> set = new HashSet<String>();
+        set.add("London");
+        set.add("Paris");
+        set.add("New York");
+        set.add("San Francisco");
+        set.add("Beijing");
+        set.add("New York");
+
+        TreeSet<String> treeSet = new TreeSet<String>(set);
+        System.out.println("Sorted tree set: " + treeSet);
+        
+        // 使用继承自SortedSet接口中的方法
+        System.out.println("first(): " + treeSet.first());
+        System.out.println("last(): " + treeSet.last());
+
+        // “排序”小于New York的部分
+        System.out.println("headSet(): " + treeSet.headSet("New York"));
+        // “排序”大于等于New York的部分
+        System.out.println("tailSet(): " + treeSet.tailSet("New York"));
+
+        // 使用继承自NavigableSet接口中的方法
+        System.out.println("lower(\"P\"): " + treeSet.lower("P")); // treeSet小于"P"中的最大元素
+        System.out.println("higher(\"P\"): " + treeSet.higher("P")); // treeSet大于"P"中的最小元素
+
+        System.out.println("floor(\"P\"): " + treeSet.floor("P")); // treeSet小于或等于"P"中的最大元素
+        System.out.println("ceiling(\"P\"): " + treeSet.ceiling("P")); // treeSet大于或等于"P"中的最小元素
+
+        System.out.println("pollFirst(): " + treeSet.pollFirst()); // 返回并删除treeSet中的第一个元素
+        System.out.println("pollLast(): " + treeSet.pollLast()); // 返回并删除treeSet中的最后一个元素
+
+        System.out.println("New tree Set: " + treeSet);
+    }
+}
+```
+
+运行结果如下：
+![image.png](https://gitee.com/litan33/image-host/raw/master/img/20231021171542.png)
+
