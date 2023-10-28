@@ -136,6 +136,106 @@ public class TreeSetDemo {
 # 二、Map
 #Java集合框架/Map
 
-其继承关系图分别如下
+Map是双列集合，用于保存具有映射关系的数据：key-value。
+
+- Map 中的 key 和 value 都可以是任何引用类型的数据。但常用String类作为Map的“键”。
+- key所属的类不允许重复，需重写hashCode()和equals()方法。
+- value所属的类可以重复，但也需重写equals()方法。
+- key和value构成一个entry。所有的entry彼此之间是无序的、不可重复的。
+
+entry（条目）、key（键）、value（值）三者的关系如下：
+![image.png](https://gitee.com/litan33/image-host/raw/master/img/20231025192323.png)
+
+
+Map的继承关系图分别如下：
 ![image.png](https://gitee.com/litan33/image-host/raw/master/img/20231004153650.png)
+
+## 2.1 Map 接口常用方法
+
+### 2.1.1 添加、修改操作
+
+>Object put(Object key,Object value)：将指定key-value添加到(或修改)当前map对象中。
+> void putAll(Map m):将m中的所有key-value对存放到当前map中
+
+### 2.1.2 删除操作
+
+>Object remove(Object key)：移除指定key的key-value对，并返回value
+> void clear()：清空当前map中的所有数据
+
+### 2.1.3 元素查询的操作
+
+>Object get(Object key)：获取指定key对应的value
+> boolean containsKey(Object key)：是否包含指定的key
+> boolean containsValue(Object value)：是否包含指定的value
+> int size()：返回map中key-value对的个数
+> boolean isEmpty()：判断当前map是否为空
+> boolean equals(Object obj)：判断当前map和参数对象obj是否相等
+### 2.1.4 元视图操作的方法
+
+> Set keySet()：返回所有key构成的Set集合
+> Collection values()：返回所有value构成的Collection集合
+> Set entrySet()：返回所有key-value对构成的Set集合
+
+示例如下：
+```java
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+
+public class MapDemo {
+    public static void main(String[] args) {
+        HashMap<String, Integer> map = new HashMap<String, Integer>();
+        map.put("Litan", 26);
+        map.put("ZhangSan", 22);
+        map.put("LiSi", 25);
+        map.put("WangWu", 19);
+  
+        System.out.println("Map成员：" + map);
+
+        map.remove("WangWu");
+        System.out.println("Map成员详情：" + map);
+
+        System.out.println("Litan的年龄：" + map.get("Litan"));
+        System.out.println("是否存在LiSi：" + map.containsKey("LiSi"));
+        System.out.println("是否存在年龄为22的成员：" + map.containsValue(22));
+        System.out.println("Map成员个数：" + map.size());
+        System.out.println("Map是否为空：" + map.isEmpty());
+
+        HashMap<String, Integer> map2 = new HashMap<>();
+        map2.putAll(map);
+        map2.put("WangWu", 19);
+        System.out.println("map2与map是否相等：" + map.equals(map2));
+
+        Set<String> keySet = map.keySet();
+        System.out.println("Map成员姓名如下：");
+        for (String key : keySet) {
+            System.out.println(key);
+        }
+
+        Collection<Integer> valueSet = map.values();
+        System.out.println("Map成员年龄如下：");
+        for (int age : valueSet) {
+            System.out.println(age);
+        }
+
+        System.out.println("Map成员详情遍历：");
+        for (Map.Entry<String, Integer> entry : map.entrySet()) {
+            System.out.println(entry.getKey() + "的年龄是：" +
+            entry.getValue() + "岁");
+        }
+    }
+}
+```
+
+运行结果结果如下：
+![image.png](https://gitee.com/litan33/image-host/raw/master/img/20231028115138.png)
+
+## 2.2 HashMap
+
+1. HashMap是线程不安全的。允许添加 null 键和 null 值。
+2. 存储数据采用的哈希表结构，底层使用一维数组+单向链表+红黑树进行key-value数据的存储。与HashSet一样，元素的存取顺序不能保证一致。
+3. **HashMap 判断两个key相等的标准是：两个 key 的hashCode值相等，通过 equals() 方法返回 true。**
+4. **HashMap 判断两个value相等的标准是：两个 value 通过 equals() 方法返回 true。**
 
