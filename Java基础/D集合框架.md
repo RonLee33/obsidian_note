@@ -139,8 +139,8 @@ public class TreeSetDemo {
 Map是双列集合，用于保存具有映射关系的数据：key-value。
 
 - Map 中的 key 和 value 都可以是任何引用类型的数据。但常用String类作为Map的“键”。
-- key所属的类不允许重复，需重写hashCode()和equals()方法。
-- value所属的类可以重复，但也需重写equals()方法。
+- key所属的类（即Set接口）不允许重复，需重写hashCode()和equals()方法。
+- value所属的类（即Collection接口）可以重复，但也需重写equals()方法。
 - key和value构成一个entry。所有的entry彼此之间是无序的、不可重复的。
 
 entry（条目）、key（键）、value（值）三者的关系如下：
@@ -238,4 +238,31 @@ public class MapDemo {
 2. 存储数据采用的哈希表结构，底层使用一维数组+单向链表+红黑树进行key-value数据的存储。与HashSet一样，元素的存取顺序不能保证一致。
 3. **HashMap 判断两个key相等的标准是：两个 key 的hashCode值相等，通过 equals() 方法返回 true。**
 4. **HashMap 判断两个value相等的标准是：两个 value 通过 equals() 方法返回 true。**
+
+## 2.3 LinkedHashMap
+
+其Entry的key按添加时的顺序保存其key的相对顺序
+示例
+```java
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+
+public class LinkedHashMapDemo {
+    public static void main(String[] args) {
+        LinkedHashMap<String, Integer> map = new LinkedHashMap<String, Integer>();
+        map.put("Litan", 26);
+        map.put("ZhangSan", 22);
+        map.put("LiSi", 25);
+        map.put("WangWu", 19);
+
+        for (Map.Entry<String, Integer> entry: map.entrySet()) {
+            System.out.println(entry.getKey() + "的年龄为：" + entry.getValue() + " 岁");
+        }
+    }
+}
+```
+
+运行结果如下：
+![image.png](https://gitee.com/litan33/image-host/raw/master/img/20231028121150.png)
 
