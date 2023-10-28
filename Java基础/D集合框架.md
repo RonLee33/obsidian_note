@@ -326,4 +326,46 @@ public class TreeMapDemo {
 运行结果如下：
 ![image.png](https://gitee.com/litan33/image-host/raw/master/img/20231028152532.png)
 
+## 2.5 Properties
 
+- Properties 类是 Hashtable 的子类，该对象用于处理属性文件。
+- 由于属性（配置文件）文件里的 key、value 都是字符串类型，所以 Properties 中要求 key 和 value 都是字符串类型。
+- 存取数据时，建议使用setProperty(String key,String value)方法和getProperty(String key)方法。
+
+> 使用Properties时，需预先建立对应的属性配置文件
+
+使用示例：
+
+```java
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Properties;
+
+  
+public class PropertiesDemo {
+    public static void main(String[] args) throws FileNotFoundException, IOException{
+        File file = new File("info.properties");
+        System.out.println(file.getAbsolutePath()); // 打印文件所在路径
+  
+        FileInputStream fis = new FileInputStream(file);
+
+        Properties properties = new Properties();
+        properties.load(fis); // 加载配置文件
+
+        // 读取配置文件
+        String name = properties.getProperty("name");
+        String password = properties.getProperty("password");
+
+        System.out.println("name: " + name);
+        System.out.println("password: " + password);
+    }
+}
+```
+
+其中，info.properties（等号两边不留空格）的内容为：
+![image.png](https://gitee.com/litan33/image-host/raw/master/img/20231028180219.png)
+
+运行结果为：
+![image.png](https://gitee.com/litan33/image-host/raw/master/img/20231028180335.png)
