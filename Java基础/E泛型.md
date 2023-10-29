@@ -168,3 +168,37 @@ public class WildCareDemo3 {
 `public static <T> void add(GenericStack<? extends T> stack1, GenericStack<T> stack2)`和`WildCareDemo3.<Object>add(stack1, stack2)` 的组合;
 - 以String为参照作为T，则有：
 `public static <T> void add(GenericStack<T> stack1, GenericStack<? super T> stack2)` 和 `WildCareDemo3.<String>add(stack1, stack2)`的组合；
+
+# 四、泛型的使用限制
+
+## 4.1 不能使用new E()
+
+原因：new 是在运行时创建对象时使用，而泛型会在运行时被消除，只存在于编译检查阶段，故不能使用`new E()`。
+
+## 4.2 不能使用`new E[]`
+
+`E[] elements = new E[5]`会报错，原因同4.1，但可以使用以下写法规避这种编译报错：
+`E[] elements = (E[]) new Object[5]`，但会有一个免检的编译警告，因为实际的Object不一定能转换成实际泛型成功。
+
+类似地，不能使用泛型类创建数组，如下：
+`ArrayList<String>[] list = new ArrayList<String>[10]`可使用以下写法规避：
+`ArrayList<String>[] list = (ArrayList<String>[]) new ArrayList[10]`
+
+## 4.3 在静态环境下不允许类的参数是泛型
+
+原因同4.1，以下代码是非法的：
+```java
+public class Test<E>{
+    public static void m(E o1){// 会报错，改为public static <E> void m(E o1) 不会报错
+    }
+    
+    public static E o1; // 报错
+    static {
+        E o2; // 报错
+    }
+}
+```
+
+## 4.4 异常类不能是泛型的
+
+异常类是在代码运行时才抛出的，而泛型是不会出现在运行时的，故异常类不能是泛型的。
