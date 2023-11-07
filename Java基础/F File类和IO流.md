@@ -20,3 +20,33 @@ File类的作用类似与C语言中的文件描述符，用于表示一个可操
 > `public File[] listFile()`：返回目录对象File下的文件列表
 > `public boolean delete()`：删除该文件/目录，删除成功则返回true
 > `public renameTo(File dest)`：将文件重命名为dest所表示的File对象的文件名
+
+# 二、IO流的原理及分类
+
+## 2.1 IO流的原理
+
+Java中将操作中的文件看成“流动的二进制数据”，“流动”分为流入（Input）和流出（Output），合称`I/O`流。
+
+## 2.2 IO流的分类
+
+按不同的用途和标准的分类如下图：
+
+![](https://gitee.com/litan33/image-host/raw/master/img/20231107201904.png)
+## 2.3 I/O流的API
+
+| 分类       | 字节输入流           | 字节输出流            | 字符输入流        | 字符输出流         |
+| ---------- | -------------------- | --------------------- | ----------------- | ------------------ |
+| 抽象基类   | InputStream          | OutputStream          | Reader            | Writer             |
+| 访问文件   | FileInputStream      | FileOutputStream      | FileReader        | FileWriter         |
+| 访问数组   | ByteArrayInputStream | ByteArrayOutputStream | CharArrayReader   | CharArrayWriter    |
+| 访问管道   | PipedInputStream     | PipedOutputStream     | PipedReader       | PipedWriter        |
+| 访问字符串 |                      |                       | StringReader      | StringWriter       |
+| 缓冲流     | BufferedInputStream  | BufferedOutputStream  | BufferedReader    | BufferedWriter     |
+| 转换流     |                      |                       | InputStreamReader | OutputStreamWriter |
+| 对象流     | ObjectInputStream    | ObjectOutputStream    |                   |                    |
+|            | FilterInputStream    | FilterOutputStream    | FilterReader      | FilterWriter       |
+| 打印流     |                      | PrintStream           |                   | PrintWriter        |
+| 推回输入流 | PushbackInputStream  |                       | PushbackReader    |                    |
+| 特殊流     | DataInputStream      | DataOutputStream      |                   |                    |
+
+
