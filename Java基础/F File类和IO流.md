@@ -160,3 +160,92 @@ public static void writeAttach() throws IOException{
     fileWriter.close();
 }
 ```
+
+## 3.3 字节流(InputStream/OutputStream)
+
+如果我们读取或写出的数据是非文本文件，则Reader、Writer就无能为力了，必须使用字节流。
+
+`InputStream`常用方法：
+
+1. `public int read()`： 从输入流读取一个字节。返回读取的字节值。虽然读取了一个字节，但是会自动提升为int类型。如果已经到达流末尾，没有数据可读，则返回-1。
+2. `public int read(byte[] b)`： 从输入流中读取一些字节数，并将它们存储到字节数组 b中 。每次最多读取b.length个字节。返回实际读取的字节个数。如果已经到达流末尾，没有数据可读，则返回-1。
+3. `public int read(byte[] b,int off,int len)`：从输入流中读取一些字节数，并将它们存储到字节数组 b中，从`b[off]`开始存储，每次最多读取len个字节 。返回实际读取的字节个数。如果已经到达流末尾，没有数据可读，则返回-1。
+4. `public void close() `：关闭此输入流并释放与此流相关联的任何系统资源。
+
+`OutputStream`常用方法：
+
+1. `public void write(int b) `：将指定的字节输出流。虽然参数为int类型四个字节，但是只会保留一个字节的信息写出。
+2. `public void write(byte[] b)`：将 b.length字节从指定的字节数组写入此输出流。
+3. `public void write(byte[] b, int off, int len) `：从指定的字节数组写入 len字节，从偏移量 off开始输出到此输出流。
+4. `public void flush()` ：刷新此输出流并强制任何缓冲的输出字节被写出。
+5. `public void close() `：关闭此输出流并释放与此流相关联的任何系统资源。
+
+## 3.4 文件字节流(FileInputStream/FileOutputStream)
+
+`FileInputStream`用于读取文件，常用构造器如下：
+
+1. `FileInputStream(File file)`： 通过打开与实际文件的连接来创建一个 FileInputStream ，该文件由文件系统中的 File对象 file命名。
+2. `FileInputStream(String name)`： 通过打开与实际文件的连接来创建一个 FileInputStream ，该文件由文件系统中的路径名 name命名。
+
+`FileOutputStream`用于写入文件，常用构造器如下：
+
+1. `public FileOutputStream(File file)`：创建文件输出流，写出由指定的 File对象表示的文件。
+2. `public FileOutputStream(String name)`： 创建文件输出流，指定的名称为写出文件。
+3. `public FileOutputStream(File file, boolean append)`： 创建文件输出流，指明是否在现有文件末尾追加内容。
+
+`FileInputStream`使用示例：
+
+```java
+public static void readFileStream() throws IOException{
+    // 读单个字节
+    FileInputStream fileInputStream = new FileInputStream(
+        new File(FileReaderWriterDemo.CHAPTER_15_ROOT_PATH + "\\hello.txt"));
+        
+    int data;
+    while ((data = fileInputStream.read()) != -1) {
+        System.out.println((char) data);
+    }
+    fileInputStream.close();
+}
+
+public static void readFileStreamChars() throws IOException{
+    // 读多个字节
+    FileInputStream fileInputStream = new FileInputStream(
+        new File(FileReaderWriterDemo.CHAPTER_15_ROOT_PATH + "\\hello.txt"));
+        
+    int len;
+    byte[] buffs = new byte[5];
+    while ((len = fileInputStream.read(buffs)) != -1) {
+        System.out.println(new String(buffs, 0, len));
+    }
+    fileInputStream.close();
+}
+```
+
+`FileOutputStream`使用示例：
+
+```java
+public static void writeFileStream() throws IOException{
+    FileOutputStream fileOutputStream = new FileOutputStream(
+        new File(FileReaderWriterDemo.CHAPTER_15_ROOT_PATH + "\\write_stream.txt"));
+
+    String text = "stream write";
+    fileOutputStream.write(text.getBytes());
+    fileOutputStream.write("\n".getBytes());
+
+    fileOutputStream.write(text.getBytes(), 0, 6);
+    fileOutputStream.write("\n".getBytes());
+
+    fileOutputStream.write(97); // 写入ASCII中的‘a’
+    fileOutputStream.close();
+}
+
+public static void writeFileStreamAttach() throws IOException{
+
+    FileOutputStream fileOutputStream = new FileOutputStream(
+        new File(FileReaderWriterDemo.CHAPTER_15_ROOT_PATH + "\\write_stream.txt"),
+        true);// 附加模式，在原内容之后追加内容
+    fileOutputStream.write("\\nAttach\\n".getBytes());
+    fileOutputStream.close();
+}
+```
