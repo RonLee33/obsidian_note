@@ -50,7 +50,7 @@ Java中将操作中的文件看成“流动的二进制数据”，“流动”�
 | 特殊流     | DataInputStream      | DataOutputStream      |                   |                    |
 
 
-# 三、字符节点流(Reader/Writer)
+# 三、节点流
 
 Java提供一些字符流类，以字符为单位读写数据，专门用于处理文本文件。不能操作图片，视频等非文本文件。
 ## 3.1 字符流 Reader/Writer
@@ -247,5 +247,159 @@ public static void writeFileStreamAttach() throws IOException{
         true);// 附加模式，在原内容之后追加内容
     fileOutputStream.write("\\nAttach\\n".getBytes());
     fileOutputStream.close();
+}
+```
+
+# 四、缓冲流(Buffered开头的)
+
+为了提高数据读写的速度和效率，Java API提供了带缓冲功能的流类：缓冲流，其常用方法和节点流的基本抽象类一样，只是构造器入参有所不同，缓冲流是处理流的一种，因此其入参类型是节点流，这是处理流不直接读写初始源文件的分类特征一致。
+
+## 4.1 字节缓冲流
+
+`public BufferedInputStream(InputStream in) `：创建一个 新的字节型的缓冲输入流。
+`public BufferedOutputStream(OutputStream out)`： 创建一个新的字节型的缓冲输出流。
+
+以下是缓冲流与基本节点流效率的对比测试，示例代码及比对结果如下：
+
+```java
+/* 基本节点流（非缓冲流）复制文件 */
+public static void copyNotTextFile(String source, String target){
+    // 复制非文本文件，如图片
+    File sourceFile = new File(
+        FileReaderWriterDemo.CHAPTER_15_ROOT_PATH + "\\" + source);
+        
+    File targetFile = new File(
+        FileReaderWriterDemo.CHAPTER_15_ROOT_PATH + "\\" + target);
+
+    FileInputStream fileInputStream = null;
+    FileOutputStream fileOutputStream = null;
+
+    int len;
+    byte[] buffs = new byte[1024];
+
+    try {
+        fileInputStream = new FileInputStream(sourceFile);
+        fileOutputStream = new FileOutputStream(targetFile);
+
+        while ((len = fileInputStream.read(buffs)) != -1) {
+            fileOutputStream.write(buffs, 0, len);
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+    } finally {
+        try {
+            if (fileInputStream != null)
+                fileInputStream.close();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        
+        try {
+            if (fileOutputStream != null)
+                fileOutputStream.close();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+```java
+/* 基本缓冲流复制文件 */
+public static void copyByBuffer(String source, String target){
+
+    File sourceFile = new File(
+        FileReaderWriterDemo.CHAPTER_15_ROOT_PATH + "\\" + source);
+
+    File targetFile = new File(
+        FileReaderWriterDemo.CHAPTER_15_ROOT_PATH + "\\" + target);
+
+    FileInputStream fileInputStream = null;
+    FileOutputStream fileOutputStream = null;
+
+    BufferedInputStream bufferedInputStream = null;
+    BufferedOutputStream bufferedOutputStream = null;
+
+    int len;
+    byte[] buff = new byte[1024];
+
+    try {
+        fileInputStream = new FileInputStream(sourceFile);
+        fileOutputStream = new FileOutputStream(targetFile);
+
+        bufferedInputStream = new BufferedInputStream(fileInputStream);
+        bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
+
+        while ((len = bufferedInputStream.read(buff)) != -1) {
+            bufferedOutputStream.write(buff, 0, len);
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+    } finally {
+        try {
+            if (bufferedInputStream != null)
+                bufferedInputStream.close();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+
+        try {
+            if (bufferedOutputStream != null)
+                bufferedOutputStream.close();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+```java
+/* 结果比对 */
+public static void main(String[] args) {
+    long start = System.currentTimeMillis();
+    CopyFile.copyNotTextFile("girls.png", "girls_copy_" + System.currentTimeMillis() + ".png");
+    long end = System.currentTimeMillis();
+    System.out.println("节点流复制耗时：" + (end - start));
+
+    start = System.currentTimeMillis();
+    CopyFileByBuffer.copyByBuffer("girls.png", "girls_copy_" + System.currentTimeMillis() + ".png");
+    end = System.currentTimeMillis();
+    System.out.println("缓冲流复制耗时：" + (end - start));
+}
+```
+
+运行结果：
+
+![image.png](https://gitee.com/litan33/image-host/raw/master/img/20231110204224.png)
+
+## 4.2 字符缓冲流
+
+`public BufferedReader(Reader in) `：创建一个 新的字符型的缓冲输入流。
+`public BufferedWriter(Writer out)`： 创建一个新的字符型的缓冲输出流。
+
+字符缓冲流特有的方法：
+
+1. 读取数据：`public String readLine()`: 读一行文字。
+2. 写入数据：`public void newLine()`: 写一行行分隔符,由系统属性定义符号。
+
+以下是代码示例：
+
+```java
+
+char surname;
+String line;
+int count;
+
+// 注意  (line = bufferedReader.readLine()) != null 的写法，
+// readLine()读到文件末尾(EOF)时，会返回null而不是返回String,
+// 因此可通过这一点来判断文件是否读取完毕
+while ((line = bufferedReader.readLine()) != null) {
+    surname = line.charAt(0);
+    if (map.containsKey(surname)){
+        count = map.get(surname);
+        map.put(surname, count + 1);
+    } else {
+        map.put(surname, 1);
+    }
 }
 ```
