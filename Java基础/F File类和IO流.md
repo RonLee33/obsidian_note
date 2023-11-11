@@ -490,5 +490,132 @@ Java读写引用数据类型（如`String`等）到文件的类为 `ObjectInputS
 
 `DataOutputStream`常用方法与`DataInputStream`一样，只需将read改为write即可。另外，需注意的是==读写基本数据类型的顺序要一致，基本数据以什么顺序写入的，就得以什么顺序读出==。
 
+## 6.2 ObjectInputStream/ObjecOutputStream
+
+ObjectInputStream除了具有DataInputStream所拥有的方法外，还有一个方法用于读取引用类型，即`Object readObject()`，类似地，ObjecOutputStream也有方法`writeObject(Object o)`。只是，能被`readObject()/writeObject(Object o)`操作地对象需要能够被序列化和反序列化。
+
+## 6.3 序列化(Serializable)
+
+序列化地过程及原理简易视图如下：
+
+![image.png](https://gitee.com/litan33/image-host/raw/master/img/20231111154742.png)
+
+就使用上而言，被写入文件或从文件被读取的对象须是`Serializable`接口的实现类，即`class ObjSer implements Serializable`，则`ObjSer`能被读写到文件。
+
+> 关于序列化，有以下几点需要注意：
+
+1. 如果对象的某个属性也是引用数据类型，那么如果该属性也要序列化的话，也要实现Serializable 接口。
+2. 该类的所有属性必须是可序列化的。如果有一个属性不需要可序列化的，则该属性必须注明是瞬态的，使用transient 关键字修饰。另外，基本数据类型属性是能被序列化的，但如果该属性被关键字`transient`修饰，则不会对其进行序列化，基本数据类型的值会被对应类型的默认值代替（如`int`默认为零，`boolean`默认为`false`等）。
+3. 静态（static）变量的值不会序列化。因为静态变量的值不属于某个对象。
+4. 需用`static final long serialVersionUID = 27182834235L`指定对应的版本号，以防反序列化时因源码中修改前的类有改变，导致修改源码后Java新生成的版本号`serialVersionUID`与原来的对不上，而报`InvalidClassException`的异常。
+
+代码示例：
+
+```java
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Scanner;
+
+import chapter15.node03.FileReaderWriterDemo;
+
+
+/**网上购物时某用户填写订单，订单内容为产品列表，保存在“save.bin”中,
+ * 运行时，如果不存在“save.bin”，则进行新订单录入，如果存在，则显示并计算客户所需付款。
+ * 编写Save()方法保存对象到 save.bin
+ * 编写Load()方法获得对象，计算客户所需付款
+*/
+
+public class OrderExer {
+    public static void main(String[] args) throws IOException, ClassNotFoundException{
+    
+        File file = new File(FileReaderWriterDemo.CHAPTER_15_ROOT_PATH + "\\save.bin");
+        if (file.exists()) {
+            load();
+        } else {
+            save();
+        }
+    }
+
+  
+    public static void save() throws IOException{
+        ArrayList<Product> list = new ArrayList<Product>();
+  
+        ObjectOutputStream oos = new ObjectOutputStream(
+            new FileOutputStream(FileReaderWriterDemo.CHAPTER_15_ROOT_PATH + "\\save.bin"));
+        Scanner scanner = new Scanner(System.in);
+        
+        String name;
+        double price;
+        int num;
+        boolean isContinue = true;
+        
+        do {
+            System.out.print("请输入产品名：");
+            name = scanner.next();
+            
+            System.out.print("请输入单价：");
+            price = scanner.nextDouble();
+
+            System.out.print("请输入数量：");
+            num = scanner.nextInt();
+
+            System.out.print("是否继续（y/n）：");
+            isContinue = scanner.next().equals("y");
+
+            list.add(new Product(name, price, num));
+        } while (isContinue);
+
+        oos.writeObject(list);
+        scanner.close();
+        oos.close();
+        System.out.println("订单已保存");
+    }
+
+    public static void load() throws IOException, ClassNotFoundException{
+    
+        ObjectInputStream ois = new ObjectInputStream(
+            new FileInputStream(FileReaderWriterDemo.CHAPTER_15_ROOT_PATH + "\\save.bin")
+        );
+
+        ArrayList<Product> list = (ArrayList<Product>) ois.readObject();
+        double total = 0.0;
+
+        System.out.println("产品名\t单价\t数量");
+        for (Product product : list) {
+            total += product.price * product.num;
+            System.out.println(product.productName + "\t" + product.price + "\t" + product.num);
+        }
+        ois.close();
+
+        System.out.println("订单总价：" + total);
+    }
+}
+ 
+
+class Product implements Serializable{
+    static final long serialVersionUID = 27182834235L;
+    
+    String productName;
+    double price;
+    int num;
+
+    public Product(String productName, double price, int num){
+        this.productName = productName;
+        this.price = price;
+        this.num = num;
+    }
+
+    @Override
+    public String toString() {
+        return "Product [productName=" + productName + ", price=" + price + ", num=" + num + "]";
+    }
+}
+```
 
 
