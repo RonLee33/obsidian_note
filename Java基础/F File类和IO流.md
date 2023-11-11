@@ -403,3 +403,92 @@ while ((line = bufferedReader.readLine()) != null) {
     }
 }
 ```
+
+# 五、转换流
+
+当读取文本文件时，由于程序读取字符文件到内存时的编码集与磁盘存储该文本文件的编码集可能不一致或不相兼容，会使读入程序的文本或写出到磁盘的文本会出现乱码，为解决此问题，需在程序读写文件时指定编码集，使文本内容一致。
+
+也可简单理解为：转换流是字节与字符间的桥梁，图示如下：
+
+![image.png](https://gitee.com/litan33/image-host/raw/master/img/20231111151249.png)
+
+输入流的构造器：
+
+1. `InputStreamReader(InputStream in)`: 创建一个使用默认字符集的字符流。
+2. `InputStreamReader(InputStream in, String charsetName)`: 创建一个指定字符集的字符流。
+
+输出流的构造器：
+
+1. `OutputStreamWriter(OutputStream in)`: 创建一个使用默认字符集的字符流。
+2. `OutputStreamWriter(OutputStream in,String charsetName)`: 创建一个指定字符集的字符流。
+
+使用示例：
+
+```java
+// 把编码集为UTF-8的《s.txt》变为GBK编码的《d.txt》
+public static void transfer(String source, String target){
+
+    BufferedReader bufferedReader = null;
+    BufferedWriter bufferedWriter = null;
+
+    try {
+        bufferedReader = new BufferedReader(
+            new InputStreamReader(
+                new FileInputStream(FileReaderWriterDemo.CHAPTER_15_ROOT_PATH + "\\" + source),
+                    "UTF-8"
+                )
+            );
+
+        bufferedWriter = new BufferedWriter(
+            new OutputStreamWriter(
+                new FileOutputStream(FileReaderWriterDemo.CHAPTER_15_ROOT_PATH + "\\" +target),
+                "GBK"
+            )
+        );
+
+        String line;
+        while ((line = bufferedReader.readLine()) != null) {
+            bufferedWriter.write(line);
+            bufferedWriter.newLine();
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    } finally {
+        try {
+            if (bufferedReader != null)
+                bufferedReader.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            if (bufferedWriter != null)
+                bufferedWriter.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+# 六、数据流与对象流
+
+前面的小结都是将文本文件或二进制文件写入磁盘中，其实Java也支持将基本数据类型（如`int`、`double`等）和对象(Object)写入磁盘中或从磁盘中读取对应的Java基本数据类型和对象。其中：
+
+Java读写基本数据类型（如`int`、`double`等）到文件的类为 `DataInputStream/DataOutputStream`。
+Java读写引用数据类型（如`String`等）到文件的类为 `ObjectInputStream/ObjecOutputStream`。
+
+## 6.1 DataInputStream/DataOutputStream
+
+`DataInputStream`常用方法：
+
+>  `byte readByte()`                `short readShort()`  
+>  `int readInt()`                  `long readLong()`  
+>  `float readFloat()`              `double readDouble()`  
+>  `char readChar() `          `boolean readBoolean()`                
+>  `String readUTF() `              `void readFully(byte[] b)`
+
+`DataOutputStream`常用方法与`DataInputStream`一样，只需将read改为write即可。另外，需注意的是==读写基本数据类型的顺序要一致，基本数据以什么顺序写入的，就得以什么顺序读出==。
+
+
+
