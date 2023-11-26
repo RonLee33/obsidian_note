@@ -257,3 +257,128 @@ public static void demo5(){
 ```
 
 ### 2.3.2 调用指定的属性、方法和构造器
+
+#### 2.3.2.1 获取及设置属性的值
+```java
+public static void getRefField() throws Exception{
+    /* 获取及设置属性的值 */
+    Class<Person> clazz = Person.class;
+
+    Person person = clazz.newInstance();
+    System.out.println("-------------获取运行时类 有权限 的 特定名称的属性------------");
+    // 获取运行时类 有权限 的 特定名称的属性
+    Field ageField = clazz.getField("age");
+    
+    // 获取实例person的属性 age, 相当于 person.age
+    System.out.println(ageField.get(person));
+
+    // 设置实例person的属性 age，相当于 person.age = 22
+    ageField.set(person, 22);
+    System.out.println(person.age);
+
+    System.out.println("-------------暴力访问无权限的【实例】属性------------");
+    // 2. 暴力访问无权限的实例属性
+    Field nameField = clazz.getDeclaredField("name");
+    nameField.setAccessible(true); // 暴力获权
+
+    // get name
+    System.out.println(nameField.get(person));
+
+    // set name
+    nameField.set(person, "Cribug");
+    System.out.println(nameField.get(person));
+  
+    System.out.println("-------------暴力访问无权限的【静态】属性------------");
+    // 3. 暴力访问无权限的静态属性 Person的 private static String descrition = "nothing";
+    Field descriptionField = clazz.getDeclaredField("description");
+    descriptionField.setAccessible(true); // 暴力获权
+
+    // get description
+    // 因为是静态变量，所以可以传入null,表示与具体的实例无关，当然也可将null 换为 具体的实例person
+    System.out.println(descriptionField.get(null));
+    // set description
+    descriptionField.set(null, "Static Field");
+    System.out.println(descriptionField.get(null));
+}
+```
+
+#### 2.3.2.2 调用运行时类指定的方法
+```java
+public static void invokeRefMethod() throws Exception{
+    /* 调用运行时类指定的方法 */
+    Class<Person> clazz = Person.class;
+
+    Person person = clazz.newInstance();
+    /* 调用 private String showNation(String nation, int age)时：
+        * 注意 int.class 不能写成 Integer.class！
+        * 虽然 int 型数据 能被装箱成 Integer型数据，
+        * 但某数的数据类型是不同的，即，int是基本数据类型，Integer是引用数据类型
+        * “类型”不一样，因此不能混淆。
+        */
+    Method showNationMethod = clazz.getDeclaredMethod("showNation", String.class, int.class);
+    showNationMethod.setAccessible(true);
+
+    // invoke()返回值与运行时类对应方法声明的返回值一样， showNation()返回String类型的，因此可强转成 String类型
+    System.out.println("showNation()返回类型是：" + showNationMethod.getReturnType().getName());
+
+    // 与静态属性类似，若方法是静态方法，则可把person换为null，表示与具体的类无关
+    String nation = (String) showNationMethod.invoke(person, "中国", 16);
+    System.out.println(nation);
+}
+```
+
+#### 2.3.2.3 调用运行时类指定的构造器
+```java
+public static void invokeRefConstructor() throws Exception{
+    /* 调用运行时类指定的构造器 */
+    Class<Person> clazz = Person.class;
+
+    // 调用 private Person(String name, int age)
+    Constructor<Person> constructor = clazz.getDeclaredConstructor(String.class, int.class);
+    constructor.setAccessible(true);// 暴力获权
+
+    Person person = constructor.newInstance("Cribug", 25);
+    System.out.println(person);
+}
+```
+
+### 2.3.3 父类完整内部信息的获取
+```java
+public static void func1() throws ClassNotFoundException{
+    Class<?> clazz = Class.forName("chapter17.node01.Person");
+    
+    // 1.获取运行时类的父类
+    Class<?> superClass = clazz.getSuperclass();
+    System.out.println(superClass);
+
+    // 2.获取运行时类的带泛型的父类
+    Type genericSuperClass = clazz.getGenericSuperclass();
+    System.out.println(genericSuperClass);
+
+    // 3.获取运行时类实现的接口
+    Class<?>[] interfaces = clazz.getInterfaces();
+    for (Class<?> class1 : interfaces) {
+        System.out.println(class1);
+    }
+
+    // 4.获取运行时所在的包
+    Package package1 = clazz.getPackage();
+    System.out.println(package1);
+
+    // 5.获取运行时类的父类的泛型(不易) 与 2是有区别的
+    // 需要通过 2 的带泛型的父类来获取 泛型实参
+    ParameterizedType parameterizedType = (ParameterizedType) genericSuperClass;
+    Type[] arguments = parameterizedType.getActualTypeArguments(); // 获取父类泛型实参，可能有多个，因此是数组
+    System.out.println(((Class<?>) arguments[0]).getName());// 得到Creature<String>中的String
+}
+```
+
+# 三、反射的应用
+
+## 3.1 反射读取注解的示例
+
+> 一个完整的注解应该包含三个部分:
+> （1）声明
+   （2）使用
+   （3）读取
+
