@@ -382,3 +382,169 @@ public static void func1() throws ClassNotFoundException{
    （2）使用
    （3）读取
 
+### 3.1.1 注解的声明
+```java
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Table {
+    // 用于“注解”数据库的表信息
+    String value() default "abc";
+}
+```
+
+```java
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Target(ElementType.FIELD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Column {
+    // 列
+    String columnName();
+    String columnType();
+}
+```
+
+### 3.1.2 注解的使用
+```java
+/** 用于定义与数据库“映射”的类，
+ * 通过Customer类来操作 数据库中的 t_customer表
+ */
+@Table(value = "t_customer")
+public class Customer {
+    @Column(columnName = "cust_name", columnType = "varchar(15)")
+    private String name;
+
+    @Column(columnName = "cust_age", columnType = "int ")
+    public int age;
+
+    public Customer(){
+        System.out.println("Customer()...");
+    }
+
+    public Customer(int age){
+        this.age = age;
+    }
+
+    public Customer(String name, int age){
+        this.name = name;
+        this.age = age;
+    }
+
+    @Override
+    public String toString() {
+        return "Customer [name=" + name + ", age=" + age + "]";
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+}
+```
+
+### 3.1.3 注解的读取（反射读取）
+```java
+/** 通过反射来使用注解的示例 */ 
+public class AnnotionUseDemoByReflection {
+    public static void main(String[] args) throws Exception {
+        getAnnotionDeclaredInClass();
+        getAnnotionDeclaredInField();
+    }
+
+    public static void getAnnotionDeclaredInClass(){
+        // 获取声明在类上的注解
+        Class<Customer> clazz = Customer.class;
+        
+        // 通过“类”来调用获取注解
+        Table annotion = clazz.getDeclaredAnnotation(Table.class);
+        System.out.println(annotion.value()); // t_customer
+    }
+
+    public static void getAnnotionDeclaredInField() throws Exception{
+        // 获取声明在属性上的注解
+        Class<Customer> clazz = Customer.class;
+
+        // 获取属性
+        Field nameField = clazz.getDeclaredField("name");
+
+        // 获取属性上的注解
+        Column nameColumn = nameField.getDeclaredAnnotation(Column.class);
+
+        System.out.println(nameColumn.columnName());
+        System.out.println(nameColumn.columnType());
+    }
+}
+```
+## 3.2 反射的“动态性”应用示例
+
+1. 示例一：
+```java
+/* 静态型，很明确地知道方法返回类型是什么,
+ * 即返回类型是固定的，与具体入参的输入无关
+ */
+public static Person getStaticInstanct(String className){
+    System.out.println("static " + className);
+    return new Person();
+}
+
+/* 动态型，在确认输入前，并不知道方法返回类型是什么,
+ * 即返回类型是动态变化，
+ * 受具体入参的输入影响的，需视具体的逻辑确定返回类型是什么
+ */
+public static <T> T getDynamicInstanct(String className) throws Exception{
+    // System.out.println("dynamic the " + className);
+    Class<?> clazz = Class.forName(className);
+
+    Constructor<?> constructor = clazz.getDeclaredConstructor();
+    constructor.setAccessible(true);
+  
+    return (T) constructor.newInstance();
+}
+```
+
+2. 示例二：
+```java
+/* 反射的动态性举例之二：
+ * 根据输入动态地创建指定地对象，并执行指定地方法
+ * 这些输入可能是来自配置文件地读取，也可能是来自客户端地请求来按需、动态地创建实时对象；
+ * 避免 实现创建所有类的对象，再按需查询获取相应对象实例的低效且可能造成内存泄漏的 硬编码
+ */
+public static Object dynamicInvoke(String className, String methodName) throws Exception{
+    Class<?> clazz = Class.forName(className);
+
+    Constructor<?> constructor = clazz.getDeclaredConstructor();
+    constructor.setAccessible(true);
+
+    // 构建动态对象
+    Object obj = constructor.newInstance();
+    
+    // 获取并调用运行时类指定的方法, 本示例为简单起见，假设调用的是无入参的方法，有入参的可适当扩展
+    Method method = clazz.getDeclaredMethod(methodName);
+    method.setAccessible(true);
+    return method.invoke(obj);
+}
+
+  
+public static void dynamicInvokeTest() throws Exception{
+    // 实际使用中：
+    // className、methodName可能是来自配置文件地读取，也可能是来自客户端地请求来按需、动态地创建实时对象
+    // 本例省去这些获取和判断的逻辑，
+    // 详见 B站 尚硅谷宋红康 Java 从入门到精通 2023 Java 17的P192中约第20分钟到29分钟之间的讲解
+    String className = "chapter17.node01.Person";
+    String methodName = "show";
+
+    Object result = dynamicInvoke(className, methodName);
+    System.out.println(result);
+}
+```
