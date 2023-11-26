@@ -438,4 +438,88 @@ public class OptionalDemo {
 }
 ```
 
-# 
+# 四、record关键字
+
+开发人员想要创建纯数据载体类（plain data carriers）通常都必须编写大量低价值、重复的、容易出错的代码。如：构造函数、getter/setter、equals()、hashCode()以及toString()等。JDK14开始，有record提供这些样板代码的默认实现，简化源程序的书写。
+
+举例如下，1和2中的代码效果完全是一样的，但使用`record`的代码更为简洁：
+
+1. 未使用record类时：
+```java
+public class Order {
+    private final int orderId;
+    private final String orderName;
+
+    public Order(int orderId, String orderName){
+        this.orderId = orderId;
+        this.orderName = orderName;
+    }
+
+    public int orderId() {
+        return orderId;
+    }
+
+    public String orderName() {
+        return orderName;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + orderId;
+        result = prime * result + ((orderName == null) ? 0 : orderName.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Order other = (Order) obj;
+        if (orderId != other.orderId)
+            return false;
+        if (orderName == null) {
+            if (other.orderName != null)
+                return false;
+        } else if (!orderName.equals(other.orderName))
+            return false;
+        return true;
+    }
+  
+    @Override
+    public String toString() {
+        return "Order [orderId=" + orderId + ", orderName=" + orderName + "]";
+    }
+}
+```
+
+2. 使用record类：
+```java
+// 此类的内部结构完全等价于Order类的实现，可能hashCode()和equals()的实现会略有不同
+// record不能有显示额父类，即，不能写成public record OrderRecord(int orderId, String orderName) extends Object
+// 因为record已隐式地声明extends Record
+
+public record OrderRecord(int orderId, String orderName) {
+    // 还可以在record声明的类中定义静态字段、静态方法、构造器或实例方法
+    static String info = "record Order";
+
+    // 不能在record声明的类中定义实例字段；类不能声明为abstract；不能声明显式的父类等。
+    public static void show(){
+        System.out.println("订单");
+    }
+
+    public OrderRecord(){
+        this(0, "盘古");
+    }
+
+    public void price(){
+        System.out.println("价格");
+    }
+}
+```
+
