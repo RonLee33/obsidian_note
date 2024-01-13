@@ -108,3 +108,30 @@ vi /etc/my.cnf
 
 在配置文件的`[mysqld]`选项组中添加`character_set_server=utf8`，保存配置后，重启mysql服务（`systemctl restart mysqld.service`）即可。
 ![image.png](https://gitee.com/litan33/image-host/raw/master/img/20240113193526.png)
+
+
+# 五、防火墙端口开放3306
+
+1. 查看防火墙状态
+```sh
+firewall-cmd --state
+```
+
+2. 永久指定开放端口
+```sh
+# --add-port 改为 --remove-port 时，是关闭端口
+firewall-cmd --zone=public --add-port=3306/tcp --permanent
+```
+
+3. 重新加载防火墙配置
+```sh
+firewall-cmd --reload
+```
+
+4. 确认端口已开放
+```sh
+firewall-cmd --zone=public --list-ports
+```
+
+如下图：
+![image.png](https://gitee.com/litan33/image-host/raw/master/img/20240113211239.png)
